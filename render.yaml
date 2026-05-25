@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: health-voice-agent
+    env: python
+    startCommand: python app.py
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: WHISPER_MODEL
+        value: base
+      - key: USER_DATA_DIR
+        value: ./user_data
