@@ -87,14 +87,12 @@ def main():
     if recorder is None or not recorder.available:
         print(
             "┌─────────────────────────────────────────────────────┐\n"
-            "│  No microphone available on this machine/server.    │\n"
-            "│  Terminal voice mode requires local audio hardware. │\n"
-            "│                                                     │\n"
-            "│  ➜  Run the web interface instead:                  │\n"
-            "│     python app.py  →  http://localhost:8000         │\n"
+            "│  No microphone detected — starting web server.      │\n"
+            "│  Visit the URL shown below to use the app.          │\n"
             "└─────────────────────────────────────────────────────┘"
         )
-        sys.exit(0)
+        import subprocess
+        subprocess.run([sys.executable, "app.py"])
 
     user = session_manager.get_or_create_user()
     agent.set_user(user)
