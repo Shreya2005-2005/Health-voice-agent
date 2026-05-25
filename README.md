@@ -1,3 +1,13 @@
+---
+title: Health Voice Agent
+emoji: 🩺
+colorFrom: teal
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Voice Health Assistant (Medi)
 
 An agentic AI voice assistant where you speak your symptoms and receive intelligent follow-up questions, possible causes, and home remedies — with health history that persists across sessions.
