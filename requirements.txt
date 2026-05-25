@@ -1,0 +1,10 @@
+groq
+faster-whisper
+pyttsx3
+webrtcvad
+chromadb
+python-dotenv
+numpy
+fastapi
+uvicorn[standard]
+python-multipart

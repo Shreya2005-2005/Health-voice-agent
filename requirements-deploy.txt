@@ -1,0 +1,9 @@
+# Web server + AI — no audio hardware needed (browser handles mic/speaker)
+groq
+faster-whisper
+chromadb
+python-dotenv
+numpy
+fastapi
+uvicorn[standard]
+python-multipart

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medi — Voice Health Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ── Setup Screen ─────────────────────────────────────────── -->
+  <div id="setup-screen">
+    <div class="setup-card">
+      <div class="setup-icon">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="30" fill="url(#grad)" opacity="0.15"/>
+          <path d="M32 14v10M32 40v10M14 32h10M40 32h10" stroke="url(#grad)" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="32" cy="32" r="8" fill="url(#grad)"/>
+          <defs>
+            <linearGradient id="grad" x1="14" y1="14" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#2DD4BF"/>
+              <stop offset="1" stop-color="#06B6D4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1>Medi</h1>
+      <p class="tagline">Your AI Voice Health Assistant</p>
+      <p class="sub">Speak your symptoms — get possible causes and home remedies, powered by Groq AI.</p>
+      <div class="name-form">
+        <input
+          type="text"
+          id="name-input"
+          placeholder="Enter your name to begin"
+          maxlength="40"
+          autocomplete="off"
+        />
+        <button id="start-btn" onclick="startSession()">
+          <span>Get Started</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <p class="disclaimer-small">⚕️ For informational purposes only. Always consult a doctor for medical decisions.</p>
+    </div>
+  </div>
+
+  <!-- ── Main App ──────────────────────────────────────────────── -->
+  <div id="app" class="hidden">
+
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <div class="header-logo">
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+            <path d="M32 10v12M32 42v12M10 32h12M42 32h12" stroke="#2DD4BF" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="9" fill="#2DD4BF"/>
+          </svg>
+          <span>Medi</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <div id="status-pill" class="status-pill status-ready">
+          <span class="status-dot"></span>
+          <span id="status-text">Ready</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="user-name-label"></span>
+        <button class="icon-btn" onclick="newConversation()" title="New conversation">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat Area -->
+    <div id="chat-area">
+      <div id="messages"></div>
+      <div id="typing-indicator" class="hidden">
+        <div class="typing-bubble">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div id="input-bar">
+      <div id="recording-wave" class="hidden">
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <span>Listening…</span>
+      </div>
+
+      <div id="input-controls">
+        <button id="mic-btn" class="mic-btn" onclick="toggleRecording()" title="Hold to speak">
+          <svg id="mic-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/>
+            <path d="M5 10a7 7 0 0014 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 19v3M9 22h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg id="stop-icon" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <input
+          type="text"
+          id="text-input"
+          placeholder="Or type your symptoms here…"
+          onkeydown="handleKey(event)"
+        />
+
+        <button id="send-btn" onclick="sendText()" title="Send">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="mute-row">
+        <label class="toggle-label">
+          <input type="checkbox" id="mute-toggle" />
+          <span class="toggle-slider"></span>
+          <span>Mute voice responses</span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
