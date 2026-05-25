@@ -13,13 +13,16 @@ logger = setup_logger(__name__)
 class AudioRecorder:
     """
     Records audio using PyAudio with WebRTC VAD for silence detection.
-    Falls back to energy-based VAD if webrtcvad is unavailable.
+    On servers with no audio hardware (Render, Railway, etc.) this class
+    initialises without crashing — record() simply returns None.
     """
 
     def __init__(self):
         self._pa = None
+        self._pyaudio = None
         self._vad = None
         self._use_webrtcvad = False
+        self._available = False
         self._init_pyaudio()
         self._init_vad()
 
@@ -27,15 +30,14 @@ class AudioRecorder:
     def _init_pyaudio(self):
         try:
             import pyaudio
-            self._pa = pyaudio.PyAudio()
             self._pyaudio = pyaudio
+            self._pa = pyaudio.PyAudio()
+            self._available = True
             logger.info("PyAudio initialized")
         except ImportError:
-            logger.error("pyaudio not installed — recording unavailable")
-            raise
+            logger.warning("pyaudio not installed — microphone recording unavailable (expected on server)")
         except Exception as e:
-            logger.error(f"PyAudio init error: {e}")
-            raise
+            logger.warning(f"PyAudio init failed ({e}) — microphone recording unavailable")
 
     def _init_vad(self):
         try:
@@ -55,19 +57,19 @@ class AudioRecorder:
                 return self._vad.is_speech(frame_bytes, SAMPLE_RATE)
             except Exception:
                 pass
-        # Energy-based fallback
         arr = np.frombuffer(frame_bytes, dtype=np.int16).astype(np.float32)
         rms = float(np.sqrt(np.mean(arr ** 2)))
-        return rms > 300  # empirical threshold for typical microphones
+        return rms > 300
 
     # ------------------------------------------------------------------
     def record(self) -> np.ndarray | None:
         """
         Block until the user speaks, then capture until silence.
-        Returns a float32 numpy array at SAMPLE_RATE, or None on error.
+        Returns a float32 numpy array at SAMPLE_RATE, or None if
+        audio hardware is unavailable.
         """
-        if self._pa is None:
-            logger.error("PyAudio not available")
+        if not self._available or self._pa is None:
+            logger.warning("Audio recording unavailable on this server")
             return None
 
         stream = self._pa.open(
@@ -82,7 +84,7 @@ class AudioRecorder:
         speech_frames = 0
         silence_frames = 0
         recording = False
-        max_frames = int(MAX_RECORDING_SECONDS * 1000 / 30)  # 30 ms per frame
+        max_frames = int(MAX_RECORDING_SECONDS * 1000 / 30)
 
         logger.debug("Waiting for speech...")
         try:
@@ -118,7 +120,15 @@ class AudioRecorder:
         audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
         return audio
 
+    @property
+    def available(self) -> bool:
+        return self._available
+
     def close(self):
         if self._pa:
-            self._pa.terminate()
+            try:
+                self._pa.terminate()
+            except Exception:
+                pass
             self._pa = None
+        self._available = False

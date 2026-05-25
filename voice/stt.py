@@ -1,34 +1,42 @@
 import numpy as np
-from faster_whisper import WhisperModel
-from config import WHISPER_MODEL, WHISPER_LANGUAGE, SAMPLE_RATE
 from utils.logger import setup_logger
+from config import WHISPER_MODEL, WHISPER_LANGUAGE, SAMPLE_RATE
 
 logger = setup_logger(__name__)
 
 
 class SpeechToText:
+    """
+    Wraps faster-whisper for audio transcription.
+    Requires no microphone hardware — works on any server.
+    Raises on init if the model cannot be loaded.
+    """
+
     def __init__(self):
         logger.info(f"Loading Whisper model '{WHISPER_MODEL}'...")
         try:
+            from faster_whisper import WhisperModel
             self._model = WhisperModel(
                 WHISPER_MODEL,
                 device="cpu",
                 compute_type="int8",
             )
             logger.info("Whisper model loaded")
+        except ImportError:
+            logger.error("faster-whisper not installed — add it to requirements")
+            raise
         except Exception as e:
-            logger.error(f"Failed to load Whisper: {e}")
+            logger.error(f"Failed to load Whisper model: {e}")
             raise
 
     def transcribe(self, audio: np.ndarray) -> str:
         """
         Transcribe a float32 numpy audio array sampled at SAMPLE_RATE.
-        Returns the transcribed string, stripped of leading/trailing whitespace.
+        Returns the transcribed string, or empty string on failure.
         """
         if audio is None or len(audio) == 0:
             return ""
         try:
-            # faster-whisper expects float32 mono at 16 kHz
             if audio.dtype != np.float32:
                 audio = audio.astype(np.float32)
             if audio.max() > 1.0:
